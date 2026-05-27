@@ -58,7 +58,7 @@ const SEED_DATA = {
   bookings: [
     {
       id: 'mock-b-1',
-      booking_number: 'LAPFIX-2026-0001',
+      booking_number: 'WS-2026-0001',
       customer_id: 'customer-user-1',
       customer_name: 'Rahul Sharma',
       customer_mobile: '9810012345',
@@ -85,7 +85,7 @@ const SEED_DATA = {
     },
     {
       id: 'mock-b-2',
-      booking_number: 'LAPFIX-2026-0002',
+      booking_number: 'WS-2026-0002',
       customer_id: null,
       customer_name: 'Jane Doe',
       customer_mobile: '9876543210',
@@ -111,7 +111,7 @@ const SEED_DATA = {
     },
     {
       id: 'mock-b-3',
-      booking_number: 'LAPFIX-2026-0003',
+      booking_number: 'WS-2026-0003',
       customer_id: null,
       customer_name: 'Amit Patel',
       customer_mobile: '9123456789',
@@ -274,7 +274,7 @@ export const api = {
   },
   bookings: {
     create: async (payload) => {
-      const uniqueNum = `LAPFIX-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const uniqueNum = `WS-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       if (isSupabaseConfigured) {
         const { data, error } = await supabase
           .from('bookings')
