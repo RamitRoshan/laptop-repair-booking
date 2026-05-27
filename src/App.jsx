@@ -18,6 +18,7 @@ export default function App() {
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
   const [processedStudentAvatar, setProcessedStudentAvatar] = useState('/student_discount_avatar.png');
+  const [processedLaptopMockup, setProcessedLaptopMockup] = useState('/tilted_macbook_mockup.png');
 
   useEffect(() => {
     const img = new Image();
@@ -44,6 +45,33 @@ export default function App() {
         setProcessedStudentAvatar(canvas.toDataURL());
       } catch (err) {
         console.error("Canvas background removal failed:", err);
+      }
+    };
+
+    const laptopImg = new Image();
+    laptopImg.src = '/tilted_macbook_mockup.png';
+    laptopImg.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = laptopImg.width;
+      canvas.height = laptopImg.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(laptopImg, 0, 0);
+      try {
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i+1];
+          const b = data[i+2];
+          // Convert pixels close to white to fully transparent
+          if (r > 240 && g > 240 && b > 240) {
+            data[i+3] = 0;
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+        setProcessedLaptopMockup(canvas.toDataURL());
+      } catch (err) {
+        console.error("Canvas laptop background removal failed:", err);
       }
     };
   }, []);
@@ -75,7 +103,7 @@ export default function App() {
       {/* 1. Header Navigation Bar */}
       <header style={{
         background: '#ffffff',
-        borderBottom: '1px solid rgba(0,0,0,0.05)',
+        borderBottom: '1px solid #ffffff',
         position: 'sticky',
         top: 0,
         zIndex: 900,
@@ -106,7 +134,7 @@ export default function App() {
           </div>
 
           {/* Navigation Links */}
-          <nav style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <nav className="desktop-nav">
             <span className="nav-link active" onClick={() => { setIsBookingOpen(false); setIsTrackingOpen(false); }}>Home</span>
             <span className="nav-link" onClick={() => setIsBookingOpen(true)}>Services</span>
             <span className="nav-link" onClick={() => setIsBookingOpen(true)}>How It Works</span>
@@ -148,7 +176,7 @@ export default function App() {
               
               {/* Left Column Text & CTA */}
               <div>
-                <h1 style={{ fontSize: '3.6rem', lineHeight: '1.1', marginBottom: '20px', color: '#09090b', fontFamily: 'var(--font-display)', fontWeight: '800' }}>
+                <h1 className="hero-headline">
                   Laptop problems?<br />
                   <span style={{ color: 'var(--secondary)' }}>We</span> <span className="highlight-got">got</span> <span style={{ color: 'var(--secondary)' }}>your back.</span>
                 </h1>
@@ -157,7 +185,7 @@ export default function App() {
                   Fast, reliable & hassle-free laptop repair with doorstep pickup & live updates.
                 </p>
 
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
+                <div className="hero-buttons">
                   <button className="btn btn-primary" onClick={() => setIsBookingOpen(true)} style={{ padding: '14px 28px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <Calendar size={18} /> Book a Repair <ArrowUpRight size={18} />
                   </button>
@@ -191,56 +219,76 @@ export default function App() {
                   <div className="laptop-bg-splatter" />
 
                   {/* Doorstep Pickup badge (Top right) with curved arrow */}
-                  <div className="badge-doorstep-wrapper" style={{ position: 'absolute', top: '-30px', right: '-15px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
-                    <div className="badge-doorstep">
-                      DOORSTEP PICKUP & DROP
+                  <div className="badge-doorstep-wrapper" style={{ position: 'absolute', top: '-40px', right: '-15px', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10 }}>
+                    <div className="badge-doorstep" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: '1.2' }}>
+                      <span>DOORSTEP</span>
+                      <span>PICKUP & DROP</span>
                     </div>
                     {/* Hand-drawn curved arrow pointing to the laptop */}
-                    <svg width="40" height="30" viewBox="0 0 50 30" fill="none" style={{ marginTop: '2px', transform: 'rotate(-5deg)' }}>
-                      <path d="M10 5 C 25 2, 35 15, 25 25 C 22 27, 18 20, 18 20" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" fill="none" />
-                      <path d="M18 20 L23 19 M18 20 L20 25" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" />
+                    <svg width="40" height="30" viewBox="0 0 40 30" fill="none" style={{ marginTop: '4px', marginLeft: '-15px', transform: 'rotate(-10deg)' }}>
+                      <path d="M35 2 C 35 15, 20 25, 5 20 M5 20 L12 14 M5 20 L10 26" stroke="#18181b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
 
                   {/* Black lightning bolt decoration */}
-                  <div style={{ position: 'absolute', top: '-15px', right: '-85px', transform: 'rotate(15deg)', opacity: 0.9, zIndex: 10 }}>
-                    <svg width="35" height="50" viewBox="0 0 24 36" fill="black" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M14 0L0 20H10L8 36L24 16H14L18 0" fill="black" />
+                  <div style={{ position: 'absolute', top: '-40px', right: '-120px', transform: 'rotate(20deg)', opacity: 0.95, zIndex: 10 }}>
+                    <svg width="60" height="85" viewBox="0 0 24 36" fill="black" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M14 0L0 20H10L8 36L24 16H14L18 0" fill="black" stroke="white" strokeWidth="0.5" />
                     </svg>
                   </div>
 
                   <div className="laptop-mockup">
-                    {/* The photorealistic laptop image */}
+                    {/* The photorealistic laptop image with background removed */}
                     <img 
-                      src="/tilted_macbook_mockup.png" 
+                      src={processedLaptopMockup} 
                       alt="Wachstum Solutions MacBook Mockup" 
                       style={{ width: '100%', height: 'auto', display: 'block', mixBlendMode: 'multiply' }} 
                     />
 
                     {/* Skewed Text Overlay on Black Screen */}
                     <div className="laptop-screen-overlay">
-                      <div className="laptop-screen-smiley">
-                        <Smile size={24} strokeWidth={2.5} />
+                      <div className="laptop-screen-smiley" style={{ top: '-10px', right: '0px' }}>
+                        <svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="20" cy="20" r="14" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" />
+                          <circle cx="15" cy="17" r="2.5" fill="var(--primary)" />
+                          <circle cx="25" cy="17" r="2.5" fill="var(--primary)" />
+                          <path d="M13 24 C 16 29, 24 29, 27 24" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" />
+                          <path d="M35 10 L40 5" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" />
+                          <path d="M38 18 L43 16" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" />
+                        </svg>
                       </div>
                       <div className="laptop-screen-text">
                         WE FIX.<br/>
                         <span style={{ color: 'var(--primary)' }}>YOU FLEX.</span>
                       </div>
-                      <div className="laptop-screen-bar" />
+                      <svg width="140" height="20" viewBox="0 0 120 20" fill="none" style={{ marginTop: '6px', transform: 'rotate(-2deg)' }}>
+                        <path d="M5 5 C 40 4, 80 8, 115 5" stroke="#8b5cf6" strokeWidth="5" strokeLinecap="round" />
+                        <path d="M15 15 C 45 13, 75 17, 105 14" stroke="#8b5cf6" strokeWidth="4.5" strokeLinecap="round" />
+                      </svg>
                     </div>
 
                     {/* Pink circle Live updates badge */}
                     <div className="badge-pink-circle">
-                      <Smile size={18} style={{ marginBottom: '2px' }} />
-                      <span>LIVE</span>
-                      <span>STATUS</span>
-                      <span>UPDATES</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--primary)" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', top: '12px', right: '35%', transform: 'rotate(15deg)' }}>
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                      </svg>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--primary)" stroke="#000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', bottom: '12px', left: '35%', transform: 'rotate(-25deg)' }}>
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                      </svg>
+                      <span style={{ position: 'relative', zIndex: 2 }}>LIVE</span>
+                      <span style={{ position: 'relative', zIndex: 2 }}>STATUS</span>
+                      <span style={{ position: 'relative', zIndex: 2 }}>UPDATES</span>
                     </div>
 
                     {/* Purple Ribbon Warranty */}
                     <div className="badge-warranty-ribbon">
-                      <span>90 DAYS WARRANTY</span>
-                      <Crown size={14} fill="#000" color="#000" style={{ transform: 'rotate(15deg)' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.1' }}>
+                        <span>90 DAYS</span>
+                        <span>WARRANTY</span>
+                      </div>
+                      <div style={{ position: 'absolute', right: '-20px', bottom: '-5px', transform: 'rotate(15deg)' }}>
+                        <Crown size={28} fill="#000" color="#000" />
+                      </div>
                     </div>
 
                   </div>
@@ -251,7 +299,7 @@ export default function App() {
           </div>
 
           {/* B. HOW IT WORKS SECTION */}
-          <div style={{ backgroundColor: '#ffffff', borderTop: '1px solid rgba(0,0,0,0.03)', borderBottom: '1px solid rgba(0,0,0,0.03)', padding: '80px 0', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ backgroundColor: '#ffffff', borderTop: '1px solid #ffffff', borderBottom: '1px solid #ffffff', padding: '80px 0', position: 'relative', overflow: 'hidden' }}>
             
             {/* Decorative background designs on left and right */}
             <div className="how-it-works-left-design">

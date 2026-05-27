@@ -126,7 +126,7 @@ export default function CustomerFlow({ showToast, initialTab }) {
         customer_mobile: mobile,
         customer_email: email,
         customer_address: serviceType === 'pickup' ? address : 'Walk-in Service Center',
-        pincode: pincode,
+        pincode: serviceType === 'pickup' ? pincode : '110001',
         device_type_id: selectedDeviceType,
         brand_id: selectedBrand,
         problem_category_id: selectedProblem,
@@ -156,8 +156,8 @@ export default function CustomerFlow({ showToast, initialTab }) {
       setStep(6);
       showToast('Booking submitted successfully!', 'success');
     } catch (err) {
-      console.error(err);
-      showToast('Booking insertion failed. Check required fields.', 'error');
+      console.error('Supabase error:', err);
+      showToast(`Booking failed: ${err.message || JSON.stringify(err)}`, 'error');
     }
   };
 
@@ -265,7 +265,7 @@ export default function CustomerFlow({ showToast, initialTab }) {
                   }}>
                     {step > num ? <Check size={16} /> : num}
                   </div>
-                  <span style={{ fontSize: '0.75rem', marginTop: '6px', fontWeight: '500' }}>
+                  <span className="step-label" style={{ color: step >= num ? 'var(--text-dark)' : 'var(--text-muted)', fontWeight: step >= num ? '600' : '400' }}>
                     {num === 1 && 'Device'}
                     {num === 2 && 'Schedule'}
                     {num === 3 && 'Details'}
@@ -371,7 +371,7 @@ export default function CustomerFlow({ showToast, initialTab }) {
 
               <div className="form-group">
                 <label className="form-label">Service Option</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="grid-2-cols">
                   <button
                     type="button"
                     className={`glass-card`}
@@ -654,11 +654,10 @@ export default function CustomerFlow({ showToast, initialTab }) {
 
               {paymentMethod === 'qr_payment' && (
                 <div className="glass-card animate-fade-in" style={{ marginBottom: '24px', textAlign: 'center', background: 'rgba(255,255,255,0.01)' }}>
-                  <h4 style={{ marginBottom: '12px' }}>LapFix UPI QR code</h4>
-                  {/* QR Image Simulation */}
+                  <h4 style={{ marginBottom: '12px' }}>Wachstum Solution UPI QR code</h4>
                   <div style={{ background: 'white', padding: '12px', display: 'inline-block', borderRadius: '8px', marginBottom: '15px' }}>
                     <img
-                      src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=lapfix@okaxis%26pn=LapFix%2520Repairs%26am=0"
+                      src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=wachstumsolution@okaxis%26pn=Wachstum%2520Solution%26am=0"
                       alt="UPI QR Code"
                       style={{ display: 'block' }}
                     />
@@ -760,15 +759,15 @@ export default function CustomerFlow({ showToast, initialTab }) {
         <div style={{ maxWidth: '750px', margin: '0 auto' }}>
           <div className="glass-card" style={{ marginBottom: '30px' }}>
             <h2 style={{ marginBottom: '8px' }}>Track Repair Ticket</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Enter your booking ID (LAPFIX-XXXX) and mobile number/email to track live progress.</p>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Enter your booking ID (WS-XXXX) and mobile number/email to track live progress.</p>
             
-            <form onSubmit={handleSearchTracking} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '12px', alignItems: 'end' }}>
+            <form onSubmit={handleSearchTracking} className="tracking-form-grid">
               <div>
                 <label className="form-label">Booking Reference</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="e.g. LAPFIX-2026-0001"
+                  placeholder="e.g. WS-2026-0001"
                   value={searchRef}
                   onChange={e => setSearchRef(e.target.value)}
                   required
@@ -880,7 +879,7 @@ export default function CustomerFlow({ showToast, initialTab }) {
                     </div>
                   ) : (
                     <div style={{ marginTop: '12px' }}>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '12px' }}>How was your experience with LapFix? Please rate our service.</p>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '12px' }}>How was your experience with Wachstum Solution? Please rate our service.</p>
                       <FeedbackForm onSubmit={(r, f) => handleFeedbackSubmit(r, f)} />
                     </div>
                   )}
