@@ -683,6 +683,12 @@ export default function App() {
         <div className="container" style={{ padding: '40px 20px' }}>
           {!currentUser ? (
             <Auth targetRole="admin" onLogin={setCurrentUser} showToast={showToast} />
+          ) : currentUser.role === 'technician' ? (
+            <div style={{ textAlign: 'center', padding: '100px 20px', background: '#fff', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+              <AlertOctagon size={48} color="var(--danger)" style={{ margin: '0 auto 20px' }} />
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '10px' }}>Access Denied</h2>
+              <p style={{ color: 'var(--text-secondary)' }}>You do not have permission to view the Admin Portal.</p>
+            </div>
           ) : (
             <AdminDashboard showToast={showToast} />
           )}

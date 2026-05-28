@@ -676,6 +676,12 @@ export const api = {
   },
   dashboard: {
     getKPIs: async () => {
+      // Backend-level Role Enforcement
+      const session = await api.auth.getSession();
+      if (!session || session.user.role !== 'admin') {
+        throw new Error('Backend Access Denied: Administrator privileges required.');
+      }
+      
       const bookings = await api.bookings.list();
       const totalBookings = bookings.length;
       const pendingRepairs = bookings.filter(b => b.status !== 'Delivered' && b.status !== 'Closed').length;
