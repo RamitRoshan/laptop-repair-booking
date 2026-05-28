@@ -11,6 +11,7 @@ import {
 import Auth from './components/Auth';
 import { api } from './supabase';
 import AboutUs from './components/AboutUs';
+import Contact from './components/Contact';
 
 export default function App() {
   const [role, setRole] = useState('customer'); // 'customer' | 'admin' | 'technician'
@@ -211,7 +212,7 @@ export default function App() {
             <span className="nav-link" onClick={() => setIsBookingOpen(true)}>How It Works</span>
             <span className="nav-link" onClick={() => { setIsTrackingOpen(true); setIsBookingOpen(false); }}>Track Repair</span>
             <span className={`nav-link ${currentView === 'about' ? 'active' : ''}`} onClick={() => { setCurrentView('about'); setIsBookingOpen(false); setIsTrackingOpen(false); }}>About Us</span>
-            <span className="nav-link">Contact</span>
+            <span className={`nav-link ${currentView === 'contact' ? 'active' : ''}`} onClick={() => { setCurrentView('contact'); setIsBookingOpen(false); setIsTrackingOpen(false); }}>Contact</span>
           </nav>
 
           {/* Call to Action Button & Logout */}
@@ -684,6 +685,8 @@ export default function App() {
             </>
           ) : currentView === 'about' ? (
             <AboutUs onBook={() => setIsBookingOpen(true)} />
+          ) : currentView === 'contact' ? (
+            <Contact />
           ) : null}
         </div>
       ) : role === 'admin' ? (
