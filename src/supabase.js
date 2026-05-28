@@ -192,10 +192,19 @@ export const api = {
     login: async ({ email, password }) => {
       if (isSupabaseConfigured) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.includes('Email not confirmed')) {
+            throw new Error('Email not confirmed. Please check your inbox for the verification link, or disable "Confirm Email" in your Supabase Authentication settings.');
+          }
+          throw error;
+        }
         // Fetch profile to get role
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
-        return { user: { ...data.user, ...profile }, session: data.session };
+        const { data: profile, error: profileError } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+        
+        // Use role from profile, or fallback to user_metadata which was set during signup
+        const resolvedRole = profile?.role || data.user?.user_metadata?.role;
+        
+        return { user: { ...data.user, ...profile, role: resolvedRole }, session: data.session };
       }
       // Mock login
       const profiles = getStore('profiles') || [];
@@ -237,13 +246,13 @@ export const api = {
 
         if (data.user) {
           const profileData = { id: data.user.id, full_name, mobile, role, email };
-
-          // Try to insert profile. If it fails with duplicate key (meaning a trigger already created it), we can ignore that specific error.
-          const { error: profileError } = await supabase.from('profiles').insert([profileData]);
-          if (profileError && profileError.code !== '23505') { // 23505 is unique violation
-            console.error("Profile insert error:", profileError);
+          
+          // Try to upsert profile to ensure role and mobile are saved, even if a Postgres trigger created the row first.
+          const { error: profileError } = await supabase.from('profiles').upsert([profileData]);
+          if (profileError) {
+             console.error("Profile upsert error:", profileError);
           }
-
+          
           return { user: { ...data.user, ...profileData }, session: data.session };
         }
       }
