@@ -201,25 +201,49 @@ export const api = {
       const profiles = getStore('profiles') || [];
       // Use full_name or email for mock matching. Since mock doesn't have password, we just match email (which mock doesn't store for all profiles, so we'll match id or something. Wait, customer mock has email, tech mock doesn't).
       // For mock, we'll just allow any password and match profile by full_name or id matching email prefix.
-      const match = profiles.find(p => 
-        (p.email && p.email === email) || 
+      const match = profiles.find(p =>
+        (p.email && p.email === email) ||
         p.full_name.toLowerCase().includes(email.split('@')[0].toLowerCase()) ||
         p.id === email // backdoor for easy testing
       );
       if (!match) throw new Error('Invalid login credentials');
-      
+
       const session = { access_token: 'mock-token', user: match };
       localStorage.setItem('lapfix_session', JSON.stringify(session));
       return { user: match, session };
     },
     signup: async ({ email, password, full_name, mobile, role }) => {
       if (isSupabaseConfigured) {
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              full_name,
+              name: full_name, // fallback for triggers expecting 'name'
+              mobile,
+              phone: mobile, // fallback for triggers expecting 'phone'
+              role
+            }
+          }
+        });
+
+        if (error) {
+          if (error.message.includes('Database error saving new user')) {
+            throw new Error('Supabase Error: Your database has a failing Postgres Trigger on auth.users, or is in read-only mode. Please check your Supabase Dashboard logs.');
+          }
+          throw error;
+        }
+
         if (data.user) {
           const profileData = { id: data.user.id, full_name, mobile, role, email };
+
+          // Try to insert profile. If it fails with duplicate key (meaning a trigger already created it), we can ignore that specific error.
           const { error: profileError } = await supabase.from('profiles').insert([profileData]);
-          if (profileError) throw profileError;
+          if (profileError && profileError.code !== '23505') { // 23505 is unique violation
+            console.error("Profile insert error:", profileError);
+          }
+
           return { user: { ...data.user, ...profileData }, session: data.session };
         }
       }
@@ -318,7 +342,7 @@ export const api = {
       let multiplier = 1;
       if (deviceTypeId === 'dt3') multiplier = 2.5; // MacBooks are expensive
       if (deviceTypeId === 'dt2') multiplier = 0.8; // Desktops are cheaper
-      
+
       const rates = {
         pc1: [3000, 6000], // Screen
         pc2: [1500, 2500], // Battery
@@ -327,7 +351,7 @@ export const api = {
         pc5: [600, 1200],   // Software
         pc6: [2500, 5000]  // Water
       };
-      
+
       const base = rates[pId] || [1000, 2000];
       return {
         min: Math.round(base[0] * multiplier),
@@ -357,7 +381,7 @@ export const api = {
         }
         throw error;
       }
-      
+
       const list = getStore('bookings');
       const newBooking = {
         ...payload,
@@ -371,7 +395,7 @@ export const api = {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
-      
+
       list.unshift(newBooking);
       setStore('bookings', list);
 
@@ -397,13 +421,13 @@ export const api = {
           .order('created_at', { ascending: false });
         if (!error) return data;
       }
-      
+
       // Inject text attributes for frontend presentation in mock mode
       const bookings = getStore('bookings');
       const brands = getStore('brands');
       const types = getStore('deviceTypes');
       const categories = getStore('problemCategories');
-      
+
       return bookings.map(b => ({
         ...b,
         brands: brands.find(br => br.id === b.brand_id) || { name: 'Unknown' },
@@ -423,10 +447,10 @@ export const api = {
         if (error) throw error;
         return data;
       }
-      
+
       const all = await api.bookings.list();
-      const match = all.find(b => 
-        b.booking_number.toLowerCase() === bookingNumber.trim().toLowerCase() && 
+      const match = all.find(b =>
+        b.booking_number.toLowerCase() === bookingNumber.trim().toLowerCase() &&
         (b.customer_mobile === phoneOrEmail.trim() || b.customer_email.toLowerCase() === phoneOrEmail.trim().toLowerCase())
       );
       return match || null;
@@ -442,15 +466,15 @@ export const api = {
         if (error) throw error;
         return data;
       }
-      
+
       const list = getStore('bookings');
       const idx = list.findIndex(b => b.id === bookingId);
       if (idx === -1) throw new Error('Booking not found');
-      
+
       const updated = { ...list[idx], ...updates, updated_at: new Date().toISOString() };
       list[idx] = updated;
       setStore('bookings', list);
-      
+
       // Auto trigger notification if status changed
       if (updates.status) {
         const notifs = getStore('notifications');
@@ -474,25 +498,25 @@ export const api = {
         const bucket = type === 'payment' ? 'payment-proofs' : 'device-images';
         const fileExt = file.name.split('.').pop();
         const filePath = `${bookingId}/${Date.now()}.${fileExt}`;
-        
+
         const { error: uploadError } = await supabase.storage
           .from(bucket)
           .upload(filePath, file);
-        
+
         if (uploadError) throw uploadError;
-        
+
         const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-        
+
         // Link to booking/database
         if (type === 'payment') {
           await api.bookings.update(bookingId, { payment_proof_url: data.publicUrl });
         } else {
           await supabase.from('device_images').insert([{ booking_id: bookingId, image_url: data.publicUrl }]);
         }
-        
+
         return data.publicUrl;
       }
-      
+
       const fakeUrl = URL.createObjectURL(file);
       if (type === 'payment') {
         await api.bookings.update(bookingId, { payment_proof_url: fakeUrl });
@@ -519,14 +543,14 @@ export const api = {
           supabase.removeChannel(channel);
         };
       }
-      
+
       // Mock tracking polling simulation
       const interval = setInterval(async () => {
         const list = getStore('bookings');
         const match = list.find(b => b.id === bookingId);
         if (match) callback(match);
       }, 3000);
-      
+
       return () => clearInterval(interval);
     }
   },
@@ -540,10 +564,10 @@ export const api = {
         const { data, error } = await query;
         if (!error) return data;
       }
-      
+
       const assignments = getStore('assignments');
       const bookings = await api.bookings.list();
-      
+
       const filtered = technicianId ? assignments.filter(a => a.technician_id === technicianId) : assignments;
       return filtered.map(a => ({
         ...a,
@@ -570,15 +594,15 @@ export const api = {
             .single();
         }
         if (res.error) throw res.error;
-        
+
         // Push status updates
         await api.bookings.update(bookingId, { status: 'Pickup Scheduled' });
         return res.data;
       }
-      
+
       const assignments = getStore('assignments');
       const existingIdx = assignments.findIndex(a => a.booking_id === bookingId);
-      
+
       const newAssign = {
         id: existingIdx !== -1 ? assignments[existingIdx].id : `mock-a-${Date.now()}`,
         booking_id: bookingId,
@@ -590,14 +614,14 @@ export const api = {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
-      
+
       if (existingIdx !== -1) {
         assignments[existingIdx] = newAssign;
       } else {
         assignments.unshift(newAssign);
       }
       setStore('assignments', assignments);
-      
+
       // Update booking status
       await api.bookings.update(bookingId, { status: 'Pickup Scheduled' });
       return newAssign;
@@ -613,14 +637,14 @@ export const api = {
         if (error) throw error;
         return data;
       }
-      
+
       const list = getStore('assignments');
       const idx = list.findIndex(a => a.id === assignmentId);
       if (idx === -1) throw new Error('Assignment not found');
-      
-      const updated = { 
-        ...list[idx], 
-        ...updates, 
+
+      const updated = {
+        ...list[idx],
+        ...updates,
         updated_at: new Date().toISOString(),
         completed_at: updates.status === 'completed' ? new Date().toISOString() : list[idx].completed_at
       };
@@ -647,16 +671,16 @@ export const api = {
       const totalBookings = bookings.length;
       const pendingRepairs = bookings.filter(b => b.status !== 'Delivered' && b.status !== 'Closed').length;
       const completedRepairs = bookings.filter(b => b.status === 'Delivered' || b.status === 'Closed').length;
-      
+
       const revenue = bookings
         .filter(b => b.payment_status === 'verified' && b.actual_price)
         .reduce((sum, b) => sum + Number(b.actual_price), 0);
-        
+
       const ratings = bookings.filter(b => b.rating);
-      const avgRating = ratings.length 
+      const avgRating = ratings.length
         ? (ratings.reduce((sum, b) => sum + b.rating, 0) / ratings.length).toFixed(1)
         : 'N/A';
-        
+
       return {
         totalBookings,
         pendingRepairs,
