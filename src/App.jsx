@@ -10,9 +10,11 @@ import {
 } from 'lucide-react';
 import Auth from './components/Auth';
 import { api } from './supabase';
+import AboutUs from './components/AboutUs';
 
 export default function App() {
   const [role, setRole] = useState('customer'); // 'customer' | 'admin' | 'technician'
+  const [currentView, setCurrentView] = useState('home'); // 'home' | 'about'
   const [toasts, setToasts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -181,7 +183,7 @@ export default function App() {
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           
           {/* Brand Logo & Tagline (Wachstum Solutions) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} onClick={() => { setIsBookingOpen(false); setIsTrackingOpen(false); }} className="nav-link">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} onClick={() => { setCurrentView('home'); setIsBookingOpen(false); setIsTrackingOpen(false); }} className="nav-link">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
                 {/* W: Purple Crown Shape */}
@@ -204,11 +206,11 @@ export default function App() {
 
           {/* Navigation Links */}
           <nav className="desktop-nav">
-            <span className="nav-link active" onClick={() => { setIsBookingOpen(false); setIsTrackingOpen(false); }}>Home</span>
+            <span className={`nav-link ${currentView === 'home' ? 'active' : ''}`} onClick={() => { setCurrentView('home'); setIsBookingOpen(false); setIsTrackingOpen(false); }}>Home</span>
             <span className="nav-link" onClick={() => setIsBookingOpen(true)}>Services</span>
             <span className="nav-link" onClick={() => setIsBookingOpen(true)}>How It Works</span>
             <span className="nav-link" onClick={() => { setIsTrackingOpen(true); setIsBookingOpen(false); }}>Track Repair</span>
-            <span className="nav-link">About Us</span>
+            <span className={`nav-link ${currentView === 'about' ? 'active' : ''}`} onClick={() => { setCurrentView('about'); setIsBookingOpen(false); setIsTrackingOpen(false); }}>About Us</span>
             <span className="nav-link">Contact</span>
           </nav>
 
@@ -251,6 +253,8 @@ export default function App() {
       {role === 'customer' ? (
         /* CUSTOMER FLOW LANDING VIEW */
         <div style={{ flex: 1 }}>
+          {currentView === 'home' ? (
+            <>
           
           {/* A. HERO SECTION */}
           <div className="container">
@@ -677,6 +681,10 @@ export default function App() {
             </div>
           </div>
 
+            </>
+          ) : currentView === 'about' ? (
+            <AboutUs onBook={() => setIsBookingOpen(true)} />
+          ) : null}
         </div>
       ) : role === 'admin' ? (
         /* ADMIN DASHBOARD ROUTE */
