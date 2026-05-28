@@ -21,6 +21,7 @@ export default function App() {
   const [processedLaptopMockup, setProcessedLaptopMockup] = useState('/tilted_macbook_mockup.png');
 
   useEffect(() => {
+    // Process Student Avatar
     const img = new Image();
     img.src = '/student_discount_avatar.png';
     img.onload = () => {
@@ -48,6 +49,7 @@ export default function App() {
       }
     };
 
+    // Process Laptop Mockup using Flood Fill to preserve internal white highlights
     const laptopImg = new Image();
     laptopImg.src = '/tilted_macbook_mockup.png';
     laptopImg.onload = () => {
@@ -59,15 +61,70 @@ export default function App() {
       try {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        const visited = new Uint8Array(width * height);
+        const queue = [];
+        
+        const add = (x, y) => {
+          if (x >= 0 && x < width && y >= 0 && y < height) {
+            const idx = y * width + x;
+            if (visited[idx] === 0) {
+              visited[idx] = 1;
+              queue.push(idx);
+            }
+          }
+        };
+
+        // Seed edges (top, bottom, left, right borders)
+        for (let x = 0; x < width; x++) { add(x, 0); add(x, height - 1); }
+        for (let y = 0; y < height; y++) { add(0, y); add(width - 1, y); }
+
+        let qIndex = 0;
+        const threshold = 230; // Anything brighter than 230 is considered white background
+        const edgePixels = [];
+
+        while (qIndex < queue.length) {
+          const p = queue[qIndex++];
+          const x = p % width;
+          const y = Math.floor(p / width);
+          const i = p * 4;
+          
           const r = data[i];
           const g = data[i+1];
           const b = data[i+2];
-          // Convert pixels close to white to fully transparent
-          if (r > 240 && g > 240 && b > 240) {
+          
+          // Check if pixel is near white background
+          if (r >= threshold && g >= threshold && b >= threshold) {
+            // It's background! Set to fully transparent
             data[i+3] = 0;
+            // Add neighbors to continue flood fill
+            add(x - 1, y);
+            add(x + 1, y);
+            add(x, y - 1);
+            add(x, y + 1);
+          } else {
+             // Not background, so it's the edge of the laptop
+             // Keep track of edge pixels to soften them (anti-aliasing)
+             edgePixels.push(p);
           }
         }
+        
+        // Anti-aliasing / Defringing the edge pixels
+        for (let j = 0; j < edgePixels.length; j++) {
+           const p = edgePixels[j];
+           const i = p * 4;
+           const r = data[i];
+           const g = data[i+1];
+           const b = data[i+2];
+           const lum = (r + g + b) / 3;
+           if (lum > 150) {
+              const alpha = Math.max(0, Math.min(255, 255 - ((lum - 150) * (255 / (threshold - 150)))));
+              data[i+3] = alpha;
+           }
+        }
+        
         ctx.putImageData(imgData, 0, 0);
         setProcessedLaptopMockup(canvas.toDataURL());
       } catch (err) {
@@ -242,12 +299,12 @@ export default function App() {
                     <img 
                       src={processedLaptopMockup} 
                       alt="Wachstum Solutions MacBook Mockup" 
-                      style={{ width: '100%', height: 'auto', display: 'block', mixBlendMode: 'multiply' }} 
+                      style={{ width: '100%', height: 'auto', display: 'block' }} 
                     />
 
                     {/* Skewed Text Overlay on Black Screen */}
                     <div className="laptop-screen-overlay">
-                      <div className="laptop-screen-smiley" style={{ top: '-10px', right: '0px' }}>
+                      <div className="laptop-screen-smiley" style={{ top: '12px', right: '28%', zIndex: 1, opacity: 0.9 }}>
                         <svg width="48" height="48" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <circle cx="20" cy="20" r="14" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" />
                           <circle cx="15" cy="17" r="2.5" fill="var(--primary)" />
@@ -257,11 +314,11 @@ export default function App() {
                           <path d="M38 18 L43 16" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" />
                         </svg>
                       </div>
-                      <div className="laptop-screen-text">
+                      <div className="laptop-screen-text" style={{ position: 'relative', zIndex: 2 }}>
                         WE FIX.<br/>
                         <span style={{ color: 'var(--primary)' }}>YOU FLEX.</span>
                       </div>
-                      <svg width="140" height="20" viewBox="0 0 120 20" fill="none" style={{ marginTop: '6px', transform: 'rotate(-2deg)' }}>
+                      <svg width="140" height="20" viewBox="0 0 120 20" fill="none" style={{ marginTop: '6px', transform: 'rotate(-2deg)', position: 'relative', zIndex: 2 }}>
                         <path d="M5 5 C 40 4, 80 8, 115 5" stroke="#8b5cf6" strokeWidth="5" strokeLinecap="round" />
                         <path d="M15 15 C 45 13, 75 17, 105 14" stroke="#8b5cf6" strokeWidth="4.5" strokeLinecap="round" />
                       </svg>

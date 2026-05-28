@@ -231,7 +231,6 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #d2ff00; /* Neon Lime/Yellow */
   top: -5%;
   left: -20%;
-  z-index: 1;
   transform: rotate(-8deg);
   /* Sketchy rough brush stroke polygon */
   clip-path: polygon(
@@ -253,7 +252,6 @@ h1, h2, h3, h4, h5, h6 {
   background-image: radial-gradient(#18181b 1.5px, transparent 1.5px);
   background-size: 14px 14px;
   opacity: 0.15;
-  z-index: 0;
   pointer-events: none;
   /* fade out edges */
   mask-image: radial-gradient(circle at center, black 40%, transparent 70%);
@@ -265,7 +263,6 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   max-width: 480px;
   margin: 0 auto;
-  z-index: 2;
 }
 
 .laptop-mockup img {
