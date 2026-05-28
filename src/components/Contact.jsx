@@ -15,7 +15,7 @@ export default function Contact() {
         <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
           
           {/* Contact Details Card */}
-          <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column', gap: '30px' }}>
+          <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: '30px' }}>
             <div>
               <h2 style={{ fontSize: '1.2rem', fontWeight: '800', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--secondary)' }}>
                 <Building size={20} />
@@ -42,7 +42,7 @@ export default function Contact() {
           </div>
 
           {/* Map Card */}
-          <div style={{ backgroundColor: '#ffffff', padding: '20px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ backgroundColor: '#ffffff', padding: '20px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column' }}>
             <div style={{ flex: 1, minHeight: '300px', borderRadius: '12px', overflow: 'hidden', marginBottom: '20px' }}>
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.680072049877!2d77.5873998148227!3d13.056019990799738!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae179326e2e50d%3A0xc3f9a7442eb3a846!2sKirloskar%20Business%20Park!5e0!3m2!1sen!2sus!4v1714561234567!5m2!1sen!2sus"
