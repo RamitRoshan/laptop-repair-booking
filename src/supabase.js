@@ -188,6 +188,69 @@ const setStore = (key, data) => localStorage.setItem(`lapfix_${key}`, JSON.strin
 // =========================================================================
 
 export const api = {
+  auth: {
+    login: async ({ email, password }) => {
+      if (isSupabaseConfigured) {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        // Fetch profile to get role
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+        return { user: { ...data.user, ...profile }, session: data.session };
+      }
+      // Mock login
+      const profiles = getStore('profiles') || [];
+      // Use full_name or email for mock matching. Since mock doesn't have password, we just match email (which mock doesn't store for all profiles, so we'll match id or something. Wait, customer mock has email, tech mock doesn't).
+      // For mock, we'll just allow any password and match profile by full_name or id matching email prefix.
+      const match = profiles.find(p => 
+        (p.email && p.email === email) || 
+        p.full_name.toLowerCase().includes(email.split('@')[0].toLowerCase()) ||
+        p.id === email // backdoor for easy testing
+      );
+      if (!match) throw new Error('Invalid login credentials');
+      
+      const session = { access_token: 'mock-token', user: match };
+      localStorage.setItem('lapfix_session', JSON.stringify(session));
+      return { user: match, session };
+    },
+    signup: async ({ email, password, full_name, mobile, role }) => {
+      if (isSupabaseConfigured) {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) throw error;
+        if (data.user) {
+          const profileData = { id: data.user.id, full_name, mobile, role, email };
+          const { error: profileError } = await supabase.from('profiles').insert([profileData]);
+          if (profileError) throw profileError;
+          return { user: { ...data.user, ...profileData }, session: data.session };
+        }
+      }
+      // Mock signup
+      const profiles = getStore('profiles') || [];
+      const newUser = { id: `mock-u-${Date.now()}`, email, full_name, mobile, role };
+      profiles.push(newUser);
+      setStore('profiles', profiles);
+      const session = { access_token: 'mock-token', user: newUser };
+      localStorage.setItem('lapfix_session', JSON.stringify(session));
+      return { user: newUser, session };
+    },
+    logout: async () => {
+      if (isSupabaseConfigured) {
+        await supabase.auth.signOut();
+        return;
+      }
+      localStorage.removeItem('lapfix_session');
+    },
+    getSession: async () => {
+      if (isSupabaseConfigured) {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error || !session) return null;
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        return { user: { ...session.user, ...profile }, session };
+      }
+      // Mock session
+      const sessStr = localStorage.getItem('lapfix_session');
+      return sessStr ? JSON.parse(sessStr) : null;
+    }
+  },
   brands: {
     list: async () => {
       if (isSupabaseConfigured) {

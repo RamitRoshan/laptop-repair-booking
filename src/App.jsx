@@ -6,12 +6,24 @@ import {
   Wrench, ShieldCheck, MapPin, CheckCircle, Smartphone, 
   AlertOctagon, Laptop, Calendar, Truck, Search, Send, 
   Star, Crown, Smile, ArrowUpRight, Menu, X, Landmark, Compass,
-  Globe, Mail, Zap
+  Globe, Mail, Zap, LogOut
 } from 'lucide-react';
+import Auth from './components/Auth';
+import { api } from './supabase';
 
 export default function App() {
   const [role, setRole] = useState('customer'); // 'customer' | 'admin' | 'technician'
   const [toasts, setToasts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    // Check auth session on load
+    api.auth.getSession().then((session) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+      }
+    });
+  }, []);
   
   // Controls modal visibility for booking flow
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -200,8 +212,21 @@ export default function App() {
             <span className="nav-link">Contact</span>
           </nav>
 
-          {/* Call to Action Button */}
-          <div>
+          {/* Call to Action Button & Logout */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            {currentUser && role !== 'customer' && (
+              <button 
+                className="btn btn-outline" 
+                onClick={async () => {
+                  await api.auth.logout();
+                  setCurrentUser(null);
+                  showToast('Logged out successfully', 'info');
+                }} 
+                style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                <LogOut size={16} /> Logout
+              </button>
+            )}
             <button className="btn btn-black" onClick={() => setIsBookingOpen(true)} style={{ padding: '8px 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               Book a Service
               <div style={{
@@ -656,12 +681,20 @@ export default function App() {
       ) : role === 'admin' ? (
         /* ADMIN DASHBOARD ROUTE */
         <div className="container" style={{ padding: '40px 20px' }}>
-          <AdminDashboard showToast={showToast} />
+          {!currentUser ? (
+            <Auth targetRole="admin" onLogin={setCurrentUser} showToast={showToast} />
+          ) : (
+            <AdminDashboard showToast={showToast} />
+          )}
         </div>
       ) : (
         /* TECHNICIAN PANEL ROUTE */
         <div className="container" style={{ padding: '40px 20px' }}>
-          <TechnicianPanel showToast={showToast} />
+          {!currentUser ? (
+            <Auth targetRole="technician" onLogin={setCurrentUser} showToast={showToast} />
+          ) : (
+            <TechnicianPanel showToast={showToast} />
+          )}
         </div>
       )}
 
