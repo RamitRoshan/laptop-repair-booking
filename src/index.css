@@ -219,6 +219,39 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Mobile Navigation */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  cursor: pointer;
+  padding: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+}
+
+.mobile-nav-overlay {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: var(--bg-white);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border-top: 1px solid var(--border-light);
+  z-index: 800;
+}
+
 /* Laptop Mockup CSS */
 .laptop-mockup-wrapper {
   position: relative;

@@ -16,6 +16,7 @@ import Contact from './components/Contact';
 export default function App() {
   const [role, setRole] = useState('customer'); // 'customer' | 'admin' | 'technician'
   const [currentView, setCurrentView] = useState('home'); // 'home' | 'about'
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -245,9 +246,24 @@ export default function App() {
                 <ArrowUpRight size={12} strokeWidth={3} />
               </div>
             </button>
+            <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            </button>
           </div>
 
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="mobile-nav-overlay animate-fade-in">
+            <span className={`nav-link ${currentView === 'home' ? 'active' : ''}`} onClick={() => { setCurrentView('home'); setIsBookingOpen(false); setIsTrackingOpen(false); setIsMobileMenuOpen(false); }}>Home</span>
+            <span className="nav-link" onClick={() => { setIsBookingOpen(true); setIsMobileMenuOpen(false); }}>Services</span>
+            <span className="nav-link" onClick={() => { setIsBookingOpen(true); setIsMobileMenuOpen(false); }}>How It Works</span>
+            <span className="nav-link" onClick={() => { setIsTrackingOpen(true); setIsBookingOpen(false); setIsMobileMenuOpen(false); }}>Track Repair</span>
+            <span className={`nav-link ${currentView === 'about' ? 'active' : ''}`} onClick={() => { setCurrentView('about'); setIsBookingOpen(false); setIsTrackingOpen(false); setIsMobileMenuOpen(false); }}>About Us</span>
+            <span className={`nav-link ${currentView === 'contact' ? 'active' : ''}`} onClick={() => { setCurrentView('contact'); setIsBookingOpen(false); setIsTrackingOpen(false); setIsMobileMenuOpen(false); }}>Contact</span>
+          </div>
+        )}
       </header>
 
       {/* DYNAMIC SCREEN ROUTING BASED ON DEVELOPER ROLE SWITCHER */}
