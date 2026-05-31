@@ -280,7 +280,7 @@ export default function App() {
               {/* Left Column Text & CTA */}
               <div>
                 <h1 className="hero-headline">
-                  Laptop problems?<br />
+                  <span style={{ color: 'darkgrey' }}>Laptop problems?</span><br />
                   <span style={{ color: 'var(--secondary)' }}>We</span> <span className="highlight-got">got</span> <span style={{ color: 'var(--secondary)' }}>your back.</span>
                 </h1>
                 
