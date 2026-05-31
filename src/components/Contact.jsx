@@ -13,7 +13,7 @@ export default function Contact() {
 
       <div className="container">
         <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
-          
+
           {/* Contact Details Card */}
           <div style={{ backgroundColor: '#ffffff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: '30px' }}>
             <div>
@@ -21,7 +21,10 @@ export default function Contact() {
                 <Building size={20} />
                 Business Name
               </h2>
-              <p style={{ fontSize: '1.1rem', fontWeight: '600', color: '#18181b' }}>Lapdesk Station</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', color: '#18181b', marginBottom: '4px' }}><b>WACHSTUM SOLUTIONS</b></p>
+              <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '16px', fontWeight: '500' }}>ONLINE PRESENCE FOR REFURBISHED LAPTOPS IS LAPDESK STATION</p>
+              <p style={{ fontSize: '1.05rem', color: '#18181b', marginBottom: '4px' }}><strong>Contact number:</strong> 9740333808</p>
+              <p style={{ fontSize: '1.05rem', color: '#18181b' }}><strong>Email Id:</strong> info@wachstumsolutions.com</p>
             </div>
 
             <div>
@@ -55,9 +58,9 @@ export default function Contact() {
                 title="Google Maps Location"
               ></iframe>
             </div>
-            <a 
-              href="https://maps.google.com/maps?q=Kirloskar+Business+Park,+Hebbal,+Bangalore" 
-              target="_blank" 
+            <a
+              href="https://maps.google.com/maps?q=Kirloskar+Business+Park,+Hebbal,+Bangalore"
+              target="_blank"
               rel="noopener noreferrer"
               className="btn btn-outline"
               style={{ padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', textDecoration: 'none' }}
