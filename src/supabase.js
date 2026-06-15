@@ -29,7 +29,12 @@ const SEED_DATA = {
     { id: 'b2', name: 'Dell' },
     { id: 'b3', name: 'HP' },
     { id: 'b4', name: 'Lenovo' },
-    { id: 'b5', name: 'ASUS' }
+    { id: 'b5', name: 'ASUS' },
+    { id: 'b6', name: 'ACER' },
+    { id: 'b7', name: 'SAMSUNG' },
+    { id: 'b8', name: 'MI' },
+    { id: 'b9', name: 'Sony' },
+    { id: 'b10', name: 'Others' }
   ],
   deviceTypes: [
     { id: 'dt1', name: 'Laptop' },
