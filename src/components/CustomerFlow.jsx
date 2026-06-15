@@ -16,6 +16,7 @@ export default function CustomerFlow({ showToast, initialTab }) {
   // Selection states
   const [selectedDeviceType, setSelectedDeviceType] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('');
+  const [macModel, setMacModel] = useState('');
   const [selectedProblem, setSelectedProblem] = useState('');
   const [estimatedPrice, setEstimatedPrice] = useState({ min: 0, max: 0 });
 
@@ -303,6 +304,7 @@ export default function CustomerFlow({ showToast, initialTab }) {
                           setSelectedBrand('dummy_apple_id');
                         } else if (selectedBrand === 'dummy_apple_id') {
                           setSelectedBrand('');
+                          setMacModel('');
                         }
                       }}
                     >
@@ -327,6 +329,22 @@ export default function CustomerFlow({ showToast, initialTab }) {
                     {brands.map(b => (
                       <option key={b.id} value={b.id}>{b.name}</option>
                     ))}
+                  </select>
+                </div>
+              )}
+
+              {deviceTypes.find(d => d.id === selectedDeviceType)?.name === 'MacBook' && (
+                <div className="form-group">
+                  <label className="form-label">Mac Model</label>
+                  <select 
+                    className="form-input form-select" 
+                    value={macModel} 
+                    onChange={e => setMacModel(e.target.value)}
+                  >
+                    <option value="">Select Mac Model</option>
+                    <option value="Macbook Air">Macbook Air</option>
+                    <option value="Macbook Pro">Macbook Pro</option>
+                    <option value="IMac">IMac</option>
                   </select>
                 </div>
               )}
@@ -363,7 +381,12 @@ export default function CustomerFlow({ showToast, initialTab }) {
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
                 <button
                   className="btn btn-primary"
-                  disabled={!selectedDeviceType || !selectedBrand || !selectedProblem}
+                  disabled={
+                    !selectedDeviceType || 
+                    !selectedBrand || 
+                    !selectedProblem || 
+                    (deviceTypes.find(d => d.id === selectedDeviceType)?.name === 'MacBook' && !macModel)
+                  }
                   onClick={() => setStep(2)}
                 >
                   Configure Appointment <ArrowRight size={18} />
