@@ -42,7 +42,8 @@ const SEED_DATA = {
     { id: 'pc3', name: 'Keyboard Defect' },
     { id: 'pc4', name: 'Motherboard Repair' },
     { id: 'pc5', name: 'Software / OS Reinstall' },
-    { id: 'pc6', name: 'Water Damage Restoration' }
+    { id: 'pc6', name: 'Water Damage Restoration' },
+    { id: 'pc7', name: 'Others' }
   ],
   timeSlots: [
     { id: 'ts1', slot_time: '09:00 AM - 12:00 PM', max_bookings: 5 },
@@ -304,11 +305,17 @@ export const api = {
   },
   problemCategories: {
     list: async () => {
+      let result = [];
       if (isSupabaseConfigured) {
         const { data, error } = await supabase.from('problem_categories').select('*').order('name');
-        if (!error) return data;
+        if (!error) result = data;
+      } else {
+        result = getStore('problemCategories') || [];
       }
-      return getStore('problemCategories');
+      if (!result.find(p => p.name === 'Others')) {
+        result.push({ id: 'dummy_others_id', name: 'Others' });
+      }
+      return result;
     }
   },
   timeSlots: {
@@ -334,7 +341,7 @@ export const api = {
   },
   pricingRules: {
     getEstimate: async (deviceTypeId, brandId, problemCategoryId) => {
-      if (isSupabaseConfigured) {
+      if (isSupabaseConfigured && problemCategoryId !== 'dummy_others_id') {
         const { data, error } = await supabase
           .from('pricing_rules')
           .select('estimated_price_min, estimated_price_max')
@@ -372,9 +379,15 @@ export const api = {
     create: async (payload) => {
       const uniqueNum = `WS-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       if (isSupabaseConfigured) {
+        let finalPayload = { ...payload };
+        if (finalPayload.problem_category_id === 'dummy_others_id') {
+          const { data: cats } = await supabase.from('problem_categories').select('id').limit(1);
+          if (cats && cats.length > 0) finalPayload.problem_category_id = cats[0].id;
+        }
+        
         const { data, error } = await supabase
           .from('bookings')
-          .insert([{ ...payload, booking_number: uniqueNum }])
+          .insert([{ ...finalPayload, booking_number: uniqueNum }])
           .select()
           .single();
         if (!error) {

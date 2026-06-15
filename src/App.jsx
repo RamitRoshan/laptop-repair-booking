@@ -412,7 +412,7 @@ export default function App() {
                           {/* Purple Ribbon Warranty */}
                           <div className="badge-warranty-ribbon">
                             <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.1' }}>
-                              <span>90 DAYS</span>
+                              <span>30 DAYS</span>
                               <span>WARRANTY</span>
                             </div>
                             <div style={{ position: 'absolute', right: '-20px', bottom: '-5px', transform: 'rotate(15deg)' }}>
@@ -648,7 +648,7 @@ export default function App() {
                         <div className="stat-circle" style={{ backgroundColor: '#8b5cf6' }}>
                           <ShieldCheck size={20} color="#0c0a09" strokeWidth={2.5} />
                         </div>
-                        <strong>90 Days</strong>
+                        <strong>30 Days</strong>
                         <span>Warranty on Repairs</span>
                       </div>
                     </div>
