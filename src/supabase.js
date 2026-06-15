@@ -287,11 +287,14 @@ export const api = {
   },
   brands: {
     list: async () => {
+      let result = [];
       if (isSupabaseConfigured) {
         const { data, error } = await supabase.from('brands').select('*').order('name');
-        if (!error) return data;
+        if (!error) result = data;
+      } else {
+        result = getStore('brands');
       }
-      return getStore('brands');
+      return (result || []).filter(brand => brand.name !== 'Apple');
     }
   },
   deviceTypes: {
@@ -341,12 +344,18 @@ export const api = {
   },
   pricingRules: {
     getEstimate: async (deviceTypeId, brandId, problemCategoryId) => {
+      let realBrandId = brandId;
+      if (isSupabaseConfigured && brandId === 'dummy_apple_id') {
+        const { data: appleBrand } = await supabase.from('brands').select('id').eq('name', 'Apple').limit(1);
+        if (appleBrand && appleBrand.length > 0) realBrandId = appleBrand[0].id;
+      }
+      
       if (isSupabaseConfigured && problemCategoryId !== 'dummy_others_id') {
         const { data, error } = await supabase
           .from('pricing_rules')
           .select('estimated_price_min, estimated_price_max')
           .eq('device_type_id', deviceTypeId)
-          .eq('brand_id', brandId)
+          .eq('brand_id', realBrandId)
           .eq('problem_category_id', problemCategoryId)
           .single();
         if (!error && data) {
@@ -380,6 +389,12 @@ export const api = {
       const uniqueNum = `WS-2026-${Math.floor(1000 + Math.random() * 9000)}`;
       if (isSupabaseConfigured) {
         let finalPayload = { ...payload };
+        
+        if (finalPayload.brand_id === 'dummy_apple_id') {
+          const { data: appleBrand } = await supabase.from('brands').select('id').eq('name', 'Apple').limit(1);
+          if (appleBrand && appleBrand.length > 0) finalPayload.brand_id = appleBrand[0].id;
+        }
+
         if (finalPayload.problem_category_id === 'dummy_others_id') {
           const { data: cats } = await supabase.from('problem_categories').select('id').limit(1);
           if (cats && cats.length > 0) finalPayload.problem_category_id = cats[0].id;

@@ -297,7 +297,14 @@ export default function CustomerFlow({ showToast, initialTab }) {
                         background: selectedDeviceType === dt.id ? 'rgba(198, 255, 0, 0.05)' : 'var(--bg-glass)',
                         cursor: 'pointer'
                       }}
-                      onClick={() => setSelectedDeviceType(dt.id)}
+                      onClick={() => {
+                        setSelectedDeviceType(dt.id);
+                        if (dt.name === 'MacBook') {
+                          setSelectedBrand('dummy_apple_id');
+                        } else if (selectedBrand === 'dummy_apple_id') {
+                          setSelectedBrand('');
+                        }
+                      }}
                     >
                       {dt.name === 'Laptop' && <Laptop size={28} color={selectedDeviceType === dt.id ? 'var(--primary)' : 'white'} />}
                       {dt.name === 'Desktop' && <Monitor size={28} color={selectedDeviceType === dt.id ? 'var(--primary)' : 'white'} />}
@@ -308,19 +315,21 @@ export default function CustomerFlow({ showToast, initialTab }) {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Brand</label>
-                <select 
-                  className="form-input form-select" 
-                  value={selectedBrand} 
-                  onChange={e => setSelectedBrand(e.target.value)}
-                >
-                  <option value="">Select Laptop/Desktop Brand</option>
-                  {brands.map(b => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
-                  ))}
-                </select>
-              </div>
+              {deviceTypes.find(d => d.id === selectedDeviceType)?.name !== 'MacBook' && (
+                <div className="form-group">
+                  <label className="form-label">Brand</label>
+                  <select 
+                    className="form-input form-select" 
+                    value={selectedBrand} 
+                    onChange={e => setSelectedBrand(e.target.value)}
+                  >
+                    <option value="">Select Laptop/Desktop Brand</option>
+                    {brands.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">What is the problem?</label>
