@@ -661,9 +661,9 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 1000;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* Changed from center to prevent top clipping */
   overflow-y: auto;
-  padding: 20px;
+  padding: 40px 20px; /* Increased top/bottom padding so it doesn't touch the top edge */
 }
 
 .modal-content-wrapper {
