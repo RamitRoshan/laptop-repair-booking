@@ -30,10 +30,10 @@ export default function Auth({ targetRole, onLogin, showToast }) {
         }
         const { user } = await api.auth.login({ email: formData.email, password: formData.password });
         
-        // Enforce RBAC: Admin can access both. Technician can only access Technician portal.
-        if (user.role === 'technician' && targetRole === 'admin') {
+        // Enforce RBAC: Only admins can access the admin portal. Technician can only access Technician portal.
+        if (targetRole === 'admin' && user.role !== 'admin') {
           await api.auth.logout(); // log them out immediately
-          throw new Error(`Access denied. This portal is for admins only.`);
+          throw new Error(`Access denied. This portal is strictly for administrators.`);
         }
         
         showToast(`Welcome back, ${user.full_name}!`, 'success');

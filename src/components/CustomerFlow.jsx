@@ -112,6 +112,18 @@ export default function CustomerFlow({ showToast, initialTab }) {
   };
 
   const submitBooking = async () => {
+    // Determine if we need to mock Apple brand
+    let finalBrand = selectedBrand;
+    const isMacBook = deviceTypes.find(dt => dt.id === selectedDeviceType)?.name === 'MacBook';
+    if (isMacBook && !selectedBrand) {
+      finalBrand = 'dummy_apple_id';
+    }
+
+    if (!selectedDate || !selectedSlot) {
+      showToast('Please select date and time slot', 'error');
+      return;
+    }
+    
     if (paymentMethod === 'razorpay') {
       setIsProcessingPayment(true);
       // Simulate Razorpay Gateway Opening
@@ -129,7 +141,7 @@ export default function CustomerFlow({ showToast, initialTab }) {
         customer_address: serviceType === 'pickup' ? address : 'Walk-in Service Center',
         pincode: serviceType === 'pickup' ? pincode : '110001',
         device_type_id: selectedDeviceType,
-        brand_id: selectedBrand,
+        brand_id: finalBrand,
         problem_category_id: selectedProblem,
         service_type: serviceType,
         scheduled_date: selectedDate,

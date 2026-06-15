@@ -278,7 +278,8 @@ export const api = {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error || !session) return null;
         const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-        return { user: { ...session.user, ...profile }, session };
+        const resolvedRole = profile?.role || session.user?.user_metadata?.role;
+        return { user: { ...session.user, ...profile, role: resolvedRole }, session };
       }
       // Mock session
       const sessStr = localStorage.getItem('lapfix_session');
