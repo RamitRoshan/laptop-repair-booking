@@ -788,7 +788,7 @@ export default function App() {
             >
               &times;
             </button>
-            <CustomerFlow showToast={showToast} initialTab="book" />
+            <CustomerFlow showToast={showToast} initialTab="book" currentUser={currentUser} />
           </div>
         </div>
       )}
@@ -807,7 +807,7 @@ export default function App() {
               &times;
             </button>
             {/* Renders tracking view directly by triggering activeTab prop simulation inside CustomerFlow */}
-            <CustomerFlow showToast={showToast} initialTab="track" />
+            <CustomerFlow showToast={showToast} initialTab="track" currentUser={currentUser} />
           </div>
         </div>
       )}

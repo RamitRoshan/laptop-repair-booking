@@ -6,7 +6,7 @@ import {
   Phone, Mail, Clock, AlertTriangle, ChevronRight, Check, X
 } from 'lucide-react';
 
-export default function CustomerFlow({ showToast, initialTab }) {
+export default function CustomerFlow({ showToast, initialTab, currentUser }) {
   const [step, setStep] = useState(1);
   const [brands, setBrands] = useState([]);
   const [deviceTypes, setDeviceTypes] = useState([]);
@@ -134,7 +134,7 @@ export default function CustomerFlow({ showToast, initialTab }) {
 
     try {
       const bookingData = {
-        customer_id: null,
+        customer_id: currentUser?.id || null,
         customer_name: name,
         customer_mobile: mobile,
         customer_email: email,
