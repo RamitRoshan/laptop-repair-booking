@@ -5,7 +5,7 @@
 -- 1. Enable pg_net extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS pg_net;
 
--- 2. Create the Trigger Function for INSERT (New Bookings)
+-- 2. Create the Trigger Function for INSERT (New Bookings
 CREATE OR REPLACE FUNCTION trigger_email_on_new_booking()
 RETURNS TRIGGER
 LANGUAGE plpgsql
